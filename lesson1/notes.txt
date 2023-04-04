@@ -1,0 +1,16 @@
+each called on a hash passes key and value to block argument and returns the original hash
+
+map called on a hash returns a (new) array # enumerable method
+
+selection selects specific values from a collection
+
+transformation changes the values / returns different values than the input collection
+
+select called on an array returns a new array containing elements for which the block returns true
+if block always returns false then an empty array is returned
+
+each called on a hash returns the original hash ; see line 1
+
+reject called on an array returns a new array containing all elements for which the block returns false
+can return empty array
+has destructive version reject!; which deletes elements for which block returns true, and returns the original array. if no changes were made, returns nil
