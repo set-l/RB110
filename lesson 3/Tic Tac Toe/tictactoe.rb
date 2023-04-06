@@ -6,18 +6,18 @@ WINNING_COMBINATIONS = [
   [1, 2, 3], [4, 5, 6], [7, 8, 9],
   [1, 4, 7], [2, 5, 8], [3, 6, 9],
   [1, 5, 9], [3, 5, 7]
-]
+].frozen
 
 def print_pause(text = nil, pause = 0)
   puts text unless text.nil?
   sleep pause unless pause.zero?
 end
 
-def player_text(human_condition, human_specific, computer_specific)
-  if human_condition == BOARD_TEXT[:player]
-    'You ' + human_specific
+def player_specific_text(human_conditional, human_text, computer_text)
+  if human_conditional == BOARD_TEXT[:player]
+    "You #{human_text}"
   else
-    'Computer ' + computer_specific
+    "Computer #{computer_text}"
   end
 end
 
@@ -45,24 +45,25 @@ def play_til_five_wins
   until scores.value? 5
     last_winner = play_til_solved! scores, last_winner
 
-    await_input unless scores.value? 5
+    await_input
   end
 
-  text_beginning = player_text scores.key(5), 'have', 'has'
+  system CLEAR_CMD
+  text_beginning = player_specific_text scores.key(5), 'have', 'has'
   print_pause "#{text_beginning} reached five wins."
 end
 
 def await_input
-  print_pause "Press enter to continue..."
+  print_pause 'Press enter to continue...'
   gets
 end
 
 def play_til_solved!(scores, last_winner)
-  board = [BOARD_TEXT[:empty]] * 9
+  board = [BOARD_TEXT[:empty]] * SQUARES_ACROSS**2
   whos_turn = choose_first_turn last_winner, scores.keys
   print_game board, scores
 
-  until winner?(board) || tie?(board)
+  until winner?(board) || board.none?(BOARD_TEXT[:empty])
     chosen_square = take_turn whos_turn, board
     board[chosen_square - 1] = whos_turn
     whos_turn = next_player whos_turn
@@ -78,15 +79,12 @@ def choose_first_turn(who_decides, players)
 
   if who_decides == BOARD_TEXT[:player]
     print_pause 'Do you want the first move? (y or n)'
-    
-    if gets.chomp.downcase.start_with? 'y'
-      moving_first = BOARD_TEXT[:player]
-    else
-      moving_first = BOARD_TEXT[:computer]
-    end
+
+    player_first = gets.chomp.downcase.start_with? 'y'
+    moving_first = player_first ? BOARD_TEXT[:player] : BOARD_TEXT[:computer]
   end
 
-  text_beginning = player_text moving_first, 'have', 'has'
+  text_beginning = player_specific_text moving_first, 'have', 'has'
   print_pause "#{text_beginning} the first move.", 0.5
 
   moving_first
@@ -122,25 +120,23 @@ end
 
 def winner?(board)
   [BOARD_TEXT[:player], BOARD_TEXT[:computer]].any? do |player|
-    if won? board, player
-      beginning_text = player_text player, 'are', 'is'
-      print_pause "#{beginning_text} the winner!"
-
-      true
-    end
+    won? board, player
   end
-end
-
-def tie?(board)
-  tied = board.none? BOARD_TEXT[:empty]
-  print_pause "It's a tie!", 0.5 if tied
-
-  tied
 end
 
 def point_to_winner_or_nil!(board, scores)
   winner = scores.keys.find { |player| won? board, player }
-  scores[winner] += 1 unless winner.nil?
+
+  if winner
+    scores[winner] += 1
+    print_game board, scores, winning_combination(board, winner)
+
+    beginning_text = player_specific_text winner, 'are', 'is'
+    print_pause "#{beginning_text} the winner!"
+  else
+    print_pause "It's a tie!"
+  end
+
   winner
 end
 
@@ -150,11 +146,17 @@ def won?(board, player)
   end
 end
 
+def winning_combination(board, player)
+  WINNING_COMBINATIONS.find do |square_combination|
+    square_combination.all? { |square| board[square - 1] == player }
+  end
+end
+
 def player_select_square(empty_squares)
   square_selected = nil
 
   until empty_squares.include? square_selected
-    print_pause "You chose an invalid square." unless square_selected.nil?
+    print_pause 'You chose an invalid square.' unless square_selected.nil?
     print_pause "Choose a square to place a #{BOARD_TEXT[:player]}:"
     print_pause "(#{joinor empty_squares})"
     square_selected = gets.chomp[0].to_i
@@ -175,7 +177,7 @@ def joinor(list, seperator = ', ', last = 'or')
     list.first
   end
 end
-require 'pry'
+
 def computer_select_square(empty_squares, board)
   return 5 if empty_squares.include? 5
 
@@ -192,24 +194,17 @@ end
 
 def computer_action_and_square(square_combination, empty_squares, board)
   non_empty_squares = square_combination - empty_squares
-  return [] if non_empty_squares == square_combination
+  pieces_in_combination = non_empty_squares.map { |square| board[square - 1] }
+  first_piece = pieces_in_combination.first
+  two_non_empty = non_empty_squares.length == 2
+  return [] unless two_non_empty && pieces_in_combination.all?(first_piece)
 
-  pieces_in_combination = non_empty_squares.map do |square|
-    board[square - 1]
-  end
+  empty_square = (empty_squares & square_combination).first
 
-  if pieces_in_combination.count(pieces_in_combination.first) == 2
-    empty_square = (square_combination - non_empty_squares).first
-
-    if pieces_in_combination.first == BOARD_TEXT[:computer]
-      action = 'offensive'
-    else
-      action = 'defensive'
-    end
-
-    [action, empty_square]
+  if first_piece == BOARD_TEXT[:computer]
+    ['offensive', empty_square]
   else
-    []
+    ['defensive', empty_square]
   end
 end
 
