@@ -108,8 +108,7 @@ def piece_or_square_colored_text(piece, square)
   if piece == BOARD_TEXT[:empty]
     color_text square.to_s, 'gray'
   else
-    human = piece == BOARD_TEXT[:player]
-    piece_color = human ? 'green' : 'red'
+    piece_color = piece == BOARD_TEXT[:player] ? 'green' : 'red'
 
     color_text piece, piece_color
   end
@@ -118,7 +117,7 @@ end
 def connect_combination!(output_board, combination)
   return if combination.nil?
 
-  connector = connector_from combination
+  connector = combinations_connector combination
   colored_connector = color_connector output_board, combination, connector
   offset_row_col = CONNECTORS_OFFSETS[connector]
 
@@ -128,7 +127,7 @@ def connect_combination!(output_board, combination)
   end
 end
 
-def connector_from(combination)
+def combinations_connector(combination)
   CONNECTORS_COMBINATIONS.keys.select! do |connector|
     CONNECTORS_COMBINATIONS[connector].include? combination
   end.first
@@ -136,8 +135,9 @@ end
 
 def color_connector(output_board, combination, connector)
   output_row, output_col = output_board_row_col(combination.first - 1)
-  human = output_board[output_row][output_col].include? BOARD_TEXT[:player]
-  connector_color = human ? 'green' : 'red'
+  output_board_text = output_board[output_row][output_col]
+  piece_is_player = output_board_text.include? BOARD_TEXT[:player]
+  connector_color = piece_is_player ? 'green' : 'red'
 
   color_text connector, connector_color
 end
