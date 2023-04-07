@@ -84,9 +84,8 @@ def print_game(board, scores, winning_combination = nil)
   scores = scores.values.join ' : '
   output_scores = "#{PLAYER_HEADER} #{scores} #{COMPUTER_HEADER}"
   output_board = updated_output_board board, winning_combination
-  output_game_sorted = [output_scores, '', output_board, '']
 
-  output_game_sorted.each { |text| puts text }
+  puts [output_scores, '', output_board, '']
 end
 
 def updated_output_board(board, winning_combination = nil)
