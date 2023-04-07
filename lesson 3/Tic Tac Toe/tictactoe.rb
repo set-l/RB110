@@ -144,10 +144,6 @@ def score_and_get_winner_or_nil!(board, scores)
   winner
 end
 
-def won?(board, player)
-  !winning_combination(board, player).nil?
-end
-
 def winning_combination(board, player)
   WINNING_COMBINATIONS.find do |square_combination|
     square_combination.all? { |square| board[square - 1] == player }
