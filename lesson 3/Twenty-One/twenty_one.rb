@@ -19,10 +19,7 @@ end
 
 OUTPUT_LENGTH = 17
 PEOPLE_OUTPUT = ">_>#{' ' * (OUTPUT_LENGTH - 6)}<_<"
-player_name = 'You'
-dealer_name = 'Dealer'
-names_spacing = OUTPUT_LENGTH - (player_name.length + dealer_name.length)
-NAMES_OUTPUT = "#{player_name}#{' ' * names_spacing}#{dealer_name}"
+NAMES_OUTPUT = "You#{' ' * (OUTPUT_LENGTH - 9)}Dealer"
 
 SUIT_COLORS = {
   '♥' => 'red', '♦' => 'red', '♣' => 'black', '♠' => 'black'
@@ -175,6 +172,19 @@ def print_game_and_pause(*args)
   sleep args.last if args.last.is_a?(Numeric)
 end
 
+def totals_to_text(players_hand, dealers_hand, show_dealers_full_hand, *)
+  unless show_dealers_full_hand || dealers_hand.empty?
+    dealers_hand = dealers_hand.length > 1 ? [dealers_hand[1]] : []
+  end
+
+  players_total_text = total(players_hand).to_s
+  dealers_total_text = total(dealers_hand).to_s
+  totals_texts_lengths = players_total_text.length + dealers_total_text.length
+  totals_texts_spacing = (' ' * (OUTPUT_LENGTH - totals_texts_lengths))
+
+  players_total_text + totals_texts_spacing + dealers_total_text
+end
+
 def game_state_to_emotions_text(totals_output)
   totals = totals_output.split.map!(&:to_i)
 
@@ -213,19 +223,6 @@ def positive_emotions(players_total, dealers_total)
   else
     '>_>'
   end
-end
-
-def totals_to_text(players_hand, dealers_hand, show_dealers_full_hand, *)
-  unless show_dealers_full_hand || dealers_hand.empty?
-    dealers_hand = dealers_hand.length > 1 ? [dealers_hand[1]] : []
-  end
-
-  players_total_text = total(players_hand).to_s
-  dealers_total_text = total(dealers_hand).to_s
-  totals_texts_lengths = players_total_text.length + dealers_total_text.length
-  totals_texts_spacing = (' ' * (OUTPUT_LENGTH - totals_texts_lengths))
-
-  players_total_text + totals_texts_spacing + dealers_total_text
 end
 
 def hands_to_text(players_hand, dealers_hand, show_dealers_full_hand, *)
