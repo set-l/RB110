@@ -21,6 +21,16 @@ def you_or_computer(player_text, computer_text, player_or_computer)
   end
 end
 
+def yes_or_no?(question)
+  loop do
+    print_pause question
+    answer = gets.chomp.downcase
+
+    return true if %w(y ye yes yes. yes!).include? answer
+    return false if %w(n no no. no!).include? answer
+  end
+end
+
 def start_game
   system CLEAR_CMD
   print_pause 'Welcome to Tic Tac Toe!'
@@ -28,15 +38,10 @@ def start_game
 
   loop do
     play_til_five_wins
-    break unless play_another_game?
+    break unless yes_or_no? 'Play again? (y or n)'
   end
 
   print_pause 'Thanks for playing Tic Tac Toe! Good bye!'
-end
-
-def play_another_game?
-  print_pause 'Play again? (y or n)'
-  gets.chomp.downcase.start_with? 'y'
 end
 
 def play_til_five_wins
@@ -80,9 +85,7 @@ def choose_first_turn(who_decides, players)
   first_move = players.sample
 
   if who_decides == BOARD_TEXT[:player]
-    print_pause 'Do you want the first move? (y or n)'
-
-    player_first = gets.chomp.downcase.start_with? 'y'
+    player_first = yes_or_no? 'Do you want the first move? (y or n)'
     first_move = player_first ? BOARD_TEXT[:player] : BOARD_TEXT[:computer]
   end
 
@@ -152,12 +155,13 @@ end
 
 def player_select_square(empty_squares)
   square_selected = nil
+  empty_squares_text = empty_squares.map(&:to_s)
 
-  until empty_squares.include? square_selected
+  until empty_squares_text.include? square_selected
     print_pause 'You chose an invalid square.' unless square_selected.nil?
     print_pause "Choose a square to place a #{BOARD_TEXT[:player]}:"
     print_pause "(#{joinor empty_squares})"
-    square_selected = gets.chomp[0].to_i
+    square_selected = gets.chomp
   end
 
   square_selected
