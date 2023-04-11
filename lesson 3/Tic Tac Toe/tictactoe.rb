@@ -164,7 +164,7 @@ def player_select_square(empty_squares)
     square_selected = gets.chomp
   end
 
-  square_selected
+  square_selected.to_i
 end
 
 def joinor(list, seperator = ', ', last = 'or')
